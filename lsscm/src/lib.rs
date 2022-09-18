@@ -1,9 +1,8 @@
+use crate::NumberError::{Parse, UnImplemented};
+use itertools::{EitherOrBoth, Itertools};
 use std::fmt::{Display, Formatter, LowerHex};
 use std::num::ParseIntError;
 use std::ops::Add;
-use itertools::{EitherOrBoth, Itertools};
-use crate::NumberError::{Parse, UnImplemented};
-
 
 pub struct Number {
     v: Vec<u64>,
@@ -17,12 +16,13 @@ pub enum NumberError {
 
 impl LowerHex for Number {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        for i in self.v.iter(){
+        for i in self.v.iter() {
             write!(f, "{:016x} ", i)?;
         }
         Ok(())
     }
 }
+
 impl Display for Number {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.v)
@@ -64,23 +64,25 @@ impl Add<&Number> for &Number {
                 carry = car;
             }
         }
-        v.push(1);
+        if carry {
+            v.push(1);
+        }
         Number { v }
     }
 }
 
 impl From<ParseIntError> for NumberError {
-    fn from(item: ParseIntError) -> NumberError {
+    fn from(_item: ParseIntError) -> NumberError {
         Parse
     }
 }
 
 impl Number {
-    pub fn get_from_str(s: &String) -> Result<Number, NumberError> {
+    pub fn get_from_str(s: &str) -> Result<Number, NumberError> {
         let (prefix, num) = s.trim().split_at(2);
         let mut vec = Vec::new();
         match prefix {
-            "0b" => { Err(UnImplemented) }
+            "0b" => Err(UnImplemented),
             "0x" => {
                 let chunks = num.chars().chunks(16);
                 for i in &chunks {
@@ -90,7 +92,7 @@ impl Number {
                 }
                 Ok(Number { v: vec })
             }
-            "0o" => { Err(UnImplemented) }
+            "0o" => Err(UnImplemented),
             _ => Err(UnImplemented),
         }
     }
