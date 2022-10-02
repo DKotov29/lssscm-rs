@@ -1,21 +1,22 @@
-use lsscm::Number;
+use std::fmt::Formatter;
+use lsscm::{Number, OverflowSub};
 
-fn main() {
-    let a;
-    println!("Enter number A in hex");
-    // let mut A_str = String::new();
-    // std::io::stdin()
-    //     .read_line(&mut A_str)
-    //     .expect("not valid utf8");
-    let mut A_str = String::from("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-    a = Number::get_from_str(&A_str).unwrap();
+fn NOTtest1() {
+    let mut a;
     let b;
-    println!("Enter number B in hex");
-    // let mut B_str = String::new();
-    // std::io::stdin()
-    //     .read_line(&mut B_str)
-    //     .expect("not valid utf8");
-    let mut B_str = String::from("0xFFFFFFFFFFFFFFFF");
-    b = Number::get_from_str(&B_str).unwrap();
-    println!("{:#x}", &a + &b);
+    let mut a_str = String::from("0xD4D2110984907B5625309D956521BAB4157B8B1ECE04043249A3D379AC112E5B9AF44E721E148D88A942744CF56A06B92D28A0DB950FE4CED2B41A0BD38BCE7D0BE1055CF5DE38F2A588C2C9A79A75011058C320A7B661C6CE1C36C7D870758307E5D2CF07D9B6E8D529779B6B2910DD17B6766A7EFEE215A98CAC300F2827DB");
+    let mut b_str = String::from("0x3A7EF2554E8940FA9B93B2A5E822CC7BB262F4A14159E4318CAE3ABF5AEB1022EC6D01DEFAB48B528868679D649B445A753684C13F6C3ADBAB059D635A2882090FC166EA9F0AAACD16A062149E4A0952F7FAAB14A0E9D3CB0BE9200DBD3B0342496421826919148E617AF1DB66978B1FCD28F8408506B79979CCBCC7F7E5FDE7");
+    a = Number::get_from_str(&a_str).unwrap();
+    b = Number::get_from_str(&b_str).unwrap();
+    println!("{:#x}", a );
 }
+
+// множення?, віднімання, з строки в число,
+fn main() {
+    NOTtest1();
+    let mut a = Number::one();
+    let mut b = Number::get_from_str("0xA0000000000000000").unwrap();
+    println!("{:#x}",&a+&b );
+
+}
+
