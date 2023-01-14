@@ -30,6 +30,14 @@ mod tests {
 
     #[test]
     fn lab3() {
-        assert_eq!(srom3::add("011", "101"), "110");
+        assert_eq!(srom3::add("0101", "1111"), "1010");
     }
+
+    #[test]
+    fn lab4() {
+        assert_eq!(srom4::add("101101", "111010"), "10111");
+    }
+
+
+
 }
