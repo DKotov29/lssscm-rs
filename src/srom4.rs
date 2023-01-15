@@ -27,10 +27,10 @@ pub fn mul(a: &str, b: &str) -> String {
     for i in 0..233 {
         v.push(Vec::new());
         for o in 0..233 {
-            if (2i32.pow(i) - 2i32.pow(o)) % p != 1 &&
-                (-2i32.pow(i) - 2i32.pow(o)) % p != 1 &&
-                (2i32.pow(o) - 2i32.pow(i)) % p != 1 &&
-                (2i32.pow(i) + 2i32.pow(o)) % p != 1 {
+            if (2i128.pow(i) - 2i128.pow(o)) % p != 1 &&
+                (-2i128.pow(i) - 2i128.pow(o)) % p != 1 &&
+                (2i128.pow(o) - 2i128.pow(i)) % p != 1 &&
+                (2i128.pow(i) + 2i128.pow(o)) % p != 1 {
                 v.get_mut(i as usize).unwrap().push(0);
             } else {
                 v.get_mut(i as usize).unwrap().push(1);

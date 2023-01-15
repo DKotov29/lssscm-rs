@@ -1,17 +1,8 @@
+
+use std::cmp::Ordering;
+use std::cmp::Ordering::{Equal, Greater};
 use std::mem;
 use crate::{from_arr_to_string, from_hex_string_to_arr};
-//
-// const P: usize = 233;
-//
-// pub fn name() {
-//     let mut array: [bool; 233+1] = [false; 234];
-//     array[P - 233] = true;
-//     array[P - 9] = true;
-//     array[P - 4] = true;
-//     array[P - 1] = true;
-//     array[P - 0] = true;
-// }
-
 
 pub fn add_right_zero(a: &str, i: usize) -> String {
     let mut a = String::from(a);
@@ -19,68 +10,128 @@ pub fn add_right_zero(a: &str, i: usize) -> String {
     a
 }
 
-pub fn mul(a: &str, b: &str) -> String {
-    let mut res = String::new();
-    (0..234).for_each(|_| res.push('0'));
-    for i in 0..233 {
-        if b.chars().nth(233 - i - 1).unwrap_or('0') == '0' {
-            continue;
+fn compare(a: &str, b: &str) -> Ordering {
+    for i in 0..a.len().max(b.len()) {
+        let aa = a.chars().nth(i);
+        let bb = b.chars().nth(i);
+        if aa.is_some() && bb.is_none() {
+            return Greater;
         }
-        res = add(add_right_zero(a, i).as_str(),res.as_str())
+        if bb.is_some() && aa.is_none() {
+            return Ordering::Less;
+        }
+        if aa.is_some() && bb.is_some() && aa.unwrap() == '1' && bb.unwrap() == '0' {
+            return Ordering::Greater;
+        }
+        if aa.is_some() && bb.is_some() && bb.unwrap() == '1' && aa.unwrap() == '0' {
+            return Ordering::Less;
+        }
     }
-    modd(res.as_str())
+    Equal
 }
 
-pub fn modd(a: &str) -> String {
-    if a.len() == 233 { return a.to_string(); }
-    let mut modd= String::from("1");
-    modd = add_right_zero(modd.as_str(), 233);
-    let mut res = a.to_string();
-    while res.len() > 233 {
-        while res.chars().nth(0) == Some('0') {
-            res = String::from(&res[1..]);
-            if res.len() == 233 {
-                return res;
+pub fn mul(mut a: &str, mut b: &str, c: &str) -> String {
+    let mut a = a.trim_start_matches("0").to_string();
+    let mut b = b.trim_start_matches("0").to_string();
+    let mut res = String::from("0");
+    for i in 0..b.len() - 1 {
+        match char_to_i(b.chars().nth(i).unwrap_or('0')) {
+            0 => {
+                if is_zero(b.as_str()) {
+                    let mut s = String::new();
+                    (0..b.len() + i).for_each(|_| s.push('0'));
+                    b = s
+                }
             }
+            1 => {
+                res = add(res.as_str(),
+                          add_right_zero(a.as_str(), b.len() - i - 1).as_str())
+            }
+            _ => {}
         }
-        let reserve = modd.clone();
-        add_right_zero(reserve.as_str(), res.len() - modd.len());
-        res = add(res.as_str(), reserve.as_str());
+    }
+    println!("{res}");
+    modd(res.as_str(), c)
+// res
+}
+
+pub fn modd(a: &str, c: &str) -> String {
+    let mut res = a.to_string();
+    if compare(a, c) == Ordering::Less {
+        return a.to_string();
+    }
+    while compare(res.as_str(), c) == Greater || compare(res.as_str(), c) == Equal {
+        let d = add_right_zero(c, res.len() - c.len());
+        res = sub(res.as_str(), d.as_str());
+        res = res.trim_start_matches("0").to_string();
     }
     res
 }
-// pub fn mul(a: &str, b: &str) -> String { todo
-//     if !a.chars().into_iter().all(|char| char == '1' || char == '0') {
-//         panic!("in mul func got not binary number");
+
+// pub fn modd(a: &str) -> String {
+//     if a.len() == 233 { return a.to_string(); }
+//     // let mut modd = String::from("100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000100011");
+//     let mut modd = String::from("1");
+//     modd = add_right_zero(modd.as_str(), 233);
+//     let mut res = a.to_string();
+//     while res.len() > 233 {
+//         while let Some(stripped) = res.strip_prefix("0") {
+//             res = String::from(stripped);
+//             if res.len() == 233 {
+//                 return res;
+//             }
+//         }
+//         let mut reserve = add_right_zero(modd.as_str(), res.len() - modd.len() - 1);
+//         res = add(res.chars().as_str(), reserve.as_str());
+//
+//         println!("reverve: {reserve} \nres: {res} \n");
 //     }
-//     let mut a = from_hex_string_to_arr(a);
-//     a.reverse();
-//     let mut result = Vec::new();
-//     let mut carry = 0i8;
-//     for i in 0..a.len() {
-//         let temp = (*a.get(i).unwrap()) as usize * b as usize + carry as usize;
-//         result.push((temp % 2) as i8);
-//         carry = (temp / 2) as i8;
-//     }
-//     if carry != 0 {
-//         result.push(carry);
-//     }
-//     result.reverse();
-//     from_arr_to_string(result)
+//     res
 // }
 
+pub fn sub(a: &str, b: &str) -> String {
+    let a = a.chars().rev().collect::<String>();
+    let b = b.chars().rev().collect::<String>();
+    let mut res = String::new();
+    for i in 0..b.len() {
+        if a.chars().nth(i).unwrap_or('0') == '1' &&
+            b.chars().nth(i).unwrap_or('0') == '0' ||
+            (a.chars().nth(i).unwrap_or('0') == '0' &&
+                b.chars().nth(i).unwrap_or('0') == '1' && i != b.len() - 1) {
+            res.push('1');
+        } else {
+            res.push('0');
+        }
+    }
+    res.push_str(&a.as_str()[b.len()..]);
+    res.chars().rev().collect::<String>()
+}
+
 pub fn add(a: &str, b: &str) -> String {
-    let mut a = a;
-    let mut b = b;
+    let mut a = a.chars().rev().collect::<String>();
+    let mut b = b.chars().rev().collect::<String>();
     let mut res = String::new();
     if a.len() < b.len() {
         mem::swap(&mut a, &mut b);
     }
     for i in 0..b.len() {
-        let rrres = char::from_u32(a.chars().nth(i).unwrap_or('0').to_digit(2).unwrap_or(0)
-            ^ b.chars().nth(i).unwrap_or('0').to_digit(2).unwrap_or(0) + 48).unwrap_or('0');
-        res.push(rrres);
+        let rrres = char_to_i(a.chars().nth(i).unwrap_or('0'))
+            ^ char_to_i(b.chars().nth(i).unwrap_or('0'));
+        res.push_str(rrres.to_string().chars().as_str());
     }
     res.push_str(&a[b.len()..]);
-    res
+
+    res.chars().rev().collect::<String>()
+}
+
+pub fn is_zero(a: &str) -> bool {
+    a.chars().all(|char| char == '0')
+}
+
+pub fn char_to_i(i: char) -> u8 {
+    match i {
+        '0' => 0,
+        '1' => 1,
+        _ => panic!("in char to int function there are problem")
+    }
 }
